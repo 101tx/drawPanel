@@ -1,0 +1,2928 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta id="viewport" name="viewport" content="width=540,user-scalable=no,target-densitydpi=high-dpi">
+    <title>绘图API</title>
+
+    <style type="text/css">
+        body, div, canvas, p {
+            margin: 0;
+            padding: 0;
+            border: 0;
+            overflow: hidden;
+
+        }
+
+        button, input {
+            border-radius: 10px;
+            background-color: pink;
+            border: 0.5px solid transparent;
+            color: snow;
+            font-size: 1em;
+            font-family: sans-serif;
+        }
+
+    </style>
+
+    <script type="text/javascript">
+        var can;
+        var canC;
+        var paintC;
+        var words;
+        var pxdatas;
+        var shapeArray = [];
+        var selectArray = [];
+        var wg = false;
+        var wgwidth = 20;
+        var n = 5;
+       var rotatez=0;
+        var du = 0;
+        var pp=0;
+        var kgs = false;
+        var paintv;
+        var canv;
+        var pxdata;
+        var tcx = 0;
+        var tcy = 0;
+        var colorS;
+        var ddu = 0;
+        var tm1 = new Date();
+        var tm2;
+        var tczkg = false;
+        var i = 0;
+        var nowColor='red';
+        var nowfl = '反色';
+        var fl;
+        var flx = 160, fly = 430, flx1 = 160, fly1 = 430, flx2 = 0, fly2 = 480, flr = 50, flr1 = 100;
+        var flxa = 0;
+        var flya = 0;
+        var flbfb = 0.5;
+        var flkg = false;
+        var flkg1 = false;
+        var flxxkg = false;
+        var flcol = 'red';
+        var flarr = [new ca(0.1, 'red'), new ca(0.5, 'yellow'), new ca(0.8, 'orange')];
+        (function () {
+            var updatemovie = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame
+
+            var paint;
+            var scw = 800;
+            var sch = 500;
+            var k = 0;
+            var r1 = 50;
+            var r2 = 150;
+            var ks = 0.6;
+
+
+            function update() {
+                drawmain();
+                updatemovie(update);
+            }
+
+            function drawmain() {
+                if (null != paint) {
+                    paint.clearRect(0, 0, scw, sch);
+                    paint.strokeStyle = "pink";
+                    Draw.clear(canv, 0, 0, canv.width, canv.height);
+                    Draw.clear(canC, 0, 270, 270, 180);
+                }
+                dwg(paint)///画网格
+                repaint(paint);
+                main(paint);
+                sele();
+                fllj();
+
+            }
+
+
+            function fllj() {
+                var ks;
+                if (flxxkg) {
+                    ks = Draw.filterX(canC, flx, fly, flx2 + flxa, fly2 - flya, flarr);
+
+
+                } else {
+                    ks = Draw.filterR(canC, flx - flxa, fly - flya, flx1 - flxa, fly1 - flya, flr, flr1, flarr);
+
+                }
+
+                Draw.rects(canC, ks, new point(10, 340), new point(240, 160));
+
+            }
+
+            function sele() {
+                if (pxdata) {
+
+                    Draw.putImg(canv, pxdata, new point(10, 10), 0, 0, D.p1);
+                }
+
+                if (kgs) {
+
+                    if (pxdata) {
+
+                        Draw.putImg(can, pxdata, D.p, 0, 0, D.p1);
+                    }
+
+                }
+
+
+            }
+
+            function dwg(paint) {
+                if (wg) {
+                    for (var i = 0; i < 850 / wgwidth; i++) {
+
+                        for (var j = 0; j < 550 / wgwidth; j++) {
+                            Draw.rect(can, new point(i * wgwidth, j * wgwidth), new point(wgwidth, wgwidth), 'transparent', 'pink', 1);
+
+                        }
+                    }
+
+                }
+            }
+
+            function repaint(paint) {
+
+
+                for (var i = 0; i < shapeArray.length; i++) {
+
+                    if (shapeArray[i].shape == '矩形') {
+
+                        var Da = shapeArray[i];
+                        paint.beginPath();
+
+                        Draw.rect(can, Da.p, Da.p1, Da.fill, Da.stroke, Da.linew, Da.du, 1, 1, Da.apl, Da.shadow);
+                        paint.rect(Da.p.x, Da.p.y, Da.p1.x, Da.p1.y);
+                        if (paint.isPointInPath(tcx, tcy)) {
+                            if (tczkg) {
+
+                                shapeArray[i].fill = D.fill;
+                                shapeArray[i].stroke = D.stroke;
+                                shapeArray[i].du = rotatez;
+                                shapeArray[i].linew= D.linew;
+                            }
+
+                        }
+                        ;
+
+                    }
+                    if (shapeArray[i].shape == '文字') {
+
+                        var Da = shapeArray[i];
+                        paint.beginPath();
+                        Draw.word(can, true, Da.stroke, Da.text, Da.p.x, Da.p.y + Da.p1.y, Da.p1.y, Da.kind, Da.alg, Da.fill);
+
+
+                    }
+
+                    if (shapeArray[i].shape == '图片') {
+
+                        var Da = shapeArray[i];
+                        paint.beginPath();
+                        if (Da.img) {
+                            Draw.pic(can, Da.img, Da.p, Da.p1.x, Da.p1.y, Da.du, Da.apl, Da.shadow);
+                        }
+
+
+                    }
+
+                    if (shapeArray[i].shape == '圆形') {
+
+                        var Da = shapeArray[i];
+                        paint.beginPath();
+                        Draw.crl(can, Da.linew, Da.stroke, Da.fill, Da.p, Da.r, 0, 360, false, Da.apl, Da.shadow);
+                        paint.arc(Da.p.x, Da.p.y, Da.r, 0, 360, false);
+                        if (paint.isPointInPath(tcx, tcy)) {
+                            if (tczkg) {
+
+                                shapeArray[i].fill = D.fill;
+                                shapeArray[i].stroke = D.stroke;
+                                shapeArray[i].du = rotatez;
+                                shapeArray[i].linew= D.linew;
+
+                            }
+
+                        }
+                        ;
+
+                    }
+
+                    if (shapeArray[i].shape == '多边形') {
+
+                        var Da = shapeArray[i];
+                        paint.beginPath();
+                        Draw.nGon(can, Da.p.x, Da.p.y, Da.n, Da.r, Da.du, Da.linew, Da.fill, Da.stroke, Da.apl, Da.shadow,tcx,tcy,function(){
+                            if(tczkg){
+                                shapeArray[i].fill = D.fill;
+                                shapeArray[i].stroke = D.stroke;
+                                shapeArray[i].du = rotatez;
+                                shapeArray[i].linew= D.linew;
+
+                            }
+
+                        });
+                        paint.closePath();
+
+                    }
+
+                    if (shapeArray[i].shape == '多角形') {
+
+                        var Da = shapeArray[i];
+                        paint.beginPath();
+                        Draw.nStar(can, Da.p.x, Da.p.y, Da.n, Da.r, Da.fill, Da.stroke, Da.linew, Da.du, Da.apl, Da.shadow,tcx,tcy,function(){
+                            if(tczkg){
+                                shapeArray[i].fill = D.fill;
+                                shapeArray[i].stroke = D.stroke;
+                                shapeArray[i].du = rotatez;
+                                shapeArray[i].linew= D.linew;
+
+                            }
+
+
+                        });
+                        paint.closePath();
+
+                    }
+
+
+                    if (shapeArray[i].shape == '直线') {
+
+                        var Da = shapeArray[i];
+                        paint.beginPath();
+                        Draw.line(can, Da.linew, Da.stroke, Da.p, Da.p1, Da.apl, Da.shadow,tcx,tcy,function(){
+                            if(tczkg){
+                                shapeArray[i].fill= D.fill;
+                                shapeArray[i].stroke= D.stroke;
+
+                            }
+
+                        });
+
+                    }
+                    if (shapeArray[i].shape == 'shape') {
+
+                        var Da = shapeArray[i];
+                        paint.beginPath();
+                        Draw.fillShape(can,Da.arr,Da.fill,Da.stroke,Da.linew,Da.apl,Da.shadow,tcx,tcy,function(){
+
+                            if(tczkg){
+                                shapeArray[i].fill = D.fill;
+                                shapeArray[i].stroke = D.stroke;
+                                shapeArray[i].du = rotatez;
+                                shapeArray[i].linew= D.linew;
+
+                            }
+                        })
+
+
+                        paint.save();
+                    }
+                    if (shapeArray[i].shape == '铅笔') {
+
+                        var Da = shapeArray[i];
+                        paint.beginPath();
+
+
+                         Draw.shape(can, Da.arr, Da.stroke, Da.linew, Da.apl, Da.shadow);
+                        paint.save();
+                    }
+
+
+                    if (shapeArray[i].shape == '曲线') {
+
+                        var Da = shapeArray[i];
+                        paint.beginPath();
+                        Draw.curve(can, Da.linew, Da.stroke, Da.p, Da.p1, Da.p2);
+                        paint.save();
+                    }
+
+                    if (shapeArray[i].shape == '橡皮') {
+
+                        var Da = shapeArray[i];
+                        paint.beginPath();
+                        if (Da.data) {
+                            Draw.putImg(can, Da.data, Da.p, 0, 0, Da.p1, 0);
+                        }
+                        paint.save();
+                    }
+
+                    if (shapeArray[i].shape == '像素') {
+
+                        var Da = shapeArray[i];
+                        paint.beginPath();
+                        if (Da.data) {
+                            Draw.putImg(can, Da.data, Da.p, 0, 0, Da.p1, 0);
+                        }
+                        paint.save();
+                    }
+
+
+                }
+
+            }
+
+            function main(paint) {
+
+
+                if (D.rectKg) {
+                    paint.beginPath();
+                    Draw.rect(can, D.p, D.p1, D.fill, D.stroke, D.linew, 0, 1, 1, D.apl, D.shadow);
+                    paint.closePath();
+                    paint.save();
+                }
+                if (D.tuKg) {
+                    paint.beginPath();
+                    if (D.img) {
+                        Draw.pic(can, D.img, D.p, D.p1.x, D.p1.y, D.du, D.apl, D.shadow);
+                    }
+                    paint.closePath();
+                    paint.save();
+                }
+                if (D.crlKg) {
+                    paint.beginPath();
+                    //  Draw.rect(can, D.p, D.p1, D.fill, D.stroke, D.linew, 0, 1, 1, D.apl, D.shadow);
+                    Draw.crl(can, D.linew, D.stroke, D.fill, D.p, D.r, 0, 360, false, D.apl, D.shadow);
+                    paint.closePath();
+                    paint.save();
+                }
+                if (D.dbxKg) {
+                    paint.beginPath();
+
+                    Draw.nGon(can, D.p.x, D.p.y, D.n, D.r, D.du, D.linew, D.fill, D.stroke, D.apl, D.shadow);
+                    paint.closePath();
+                    paint.save();
+                }
+                if (D.djxKg) {
+                    paint.beginPath();
+
+                    Draw.nStar(can, D.p.x, D.p.y, D.n, D.r, D.fill, D.stroke, D.linew, D.du, D.apl, D.shadow);
+                    paint.closePath();
+                    paint.save();
+                }
+
+//
+                if (D.lineKg) {
+                    paint.beginPath();
+                    Draw.line(can, D.linew, D.stroke, D.p, D.p1, D.apl, D.shadow);
+                    paint.closePath();
+                    paint.save();
+                }
+
+                if (D.panKg) {
+                    paint.beginPath();
+                    Draw.shape(can, D.arr, D.stroke, D.linew, D.apl, D.shadow);
+                    paint.closePath();
+                    paint.save();
+                }
+                if (D.shapeKg) {
+                    paint.beginPath();
+                    Draw.shape(can, D.arr, D.stroke, D.linew, D.apl, D.shadow);
+                    paint.closePath();
+                    paint.save();
+                }
+
+                if (D.quKg) {
+                    paint.beginPath();
+                    Draw.curve(can, D.linew, D.stroke, D.p, D.p1, D.p2);
+                    paint.closePath();
+                    paint.save();
+                }
+                if (D.xpKg) {
+                    paint.beginPath();
+                    Draw.rect(can, D.p, D.p1, 'transparent', 'pink', 1, 0, 1, 1, 1);
+                    paint.closePath();
+                    paint.save();
+                }
+
+
+            }
+
+
+            function init() {
+                can = document.getElementById("canvas");
+                paint = can.getContext("2d");
+                canv = document.getElementById("canvas1");
+                paintv = canv.getContext("2d");
+                cana = document.getElementById("canvas2");
+                painta = canv.getContext("2d");
+                words = document.getElementById("word");
+                canC = document.getElementById("canvasColor");
+                paintC = canC.getContext("2d");
+                colorS = getColorA(625);
+                DrawColor();
+            }
+
+            onload = function () {
+                init();
+                update();
+            }
+
+
+        })()
+
+
+        ////////////////////////////////////////////////////////////////////////////tool/////////////////////////////////////////////////////////////////////////////
+        function point(x, y) {
+            this.x = x;
+            this.y = y;
+        }
+        function ca(pd, color) {
+            this.pd = pd;
+            this.color = color;
+        }
+
+        /**
+         *
+         * 数组功能拓展
+         * 根据值删除数组元素
+         * @param val
+         */
+        Array.prototype.remove = function (val) {
+            if (val != null && this.length > 0) {
+                for (var i = 0; i < this.length; i++) {
+                    if (this[i] == val) {
+                        this.splice(i, 1);
+                        break;
+                    }
+                }
+            }
+        }
+
+
+        /**
+         *
+         * 删除指定索引处元素
+         * @param dx
+         * @returns {Array}
+         */
+        Array.prototype.del = function (dx) {
+            if (isNaN(dx) || dx > this.length || dx < 0) {
+                return this;
+            } else {
+                this.splice(dx, 1);
+            }
+        }
+
+        /**
+         *
+         * 向数组末尾追加一个元素
+         * @param val
+         * @returns {Number|number}
+         */
+        Array.prototype.add = function (val) {
+
+            if (val != null) {
+                return this.push(val);
+
+
+            }
+        }
+
+        /**
+         *
+         * 清空数组
+         * @returns {Array|T[]}
+         */
+        Array.prototype.clear = function () {
+            return this.splice(0, this.length);
+        }
+
+
+        /**
+         *
+         *
+         * 交换两个元素的值
+         * @param index1
+         * @param index2
+         * @returns {*|T}
+         */
+        Array.prototype.swap = function (index1, index2) {
+            if (index1 < this.length && index2 < this.length && index1 >= 0 && index2 >= 0) {
+                return this[index1] = this.splice(index2, 1, this[index1])[0];
+            }
+        }
+
+        /**
+         * 数组上移
+         * @param index
+         */
+        Array.prototype.up = function (index) {
+            if (index != null && index >= 0 && index < this.length) {
+                if (index == 0) {
+                    return;
+                }
+                this.swap(index, index - 1);
+            }
+        };
+        //以冒泡的形式将任意位置的元素浮出到数组末尾
+        Array.prototype.fc = function (index) {
+
+
+            if (index != null && index >= 0 && index < this.length) {
+
+                for (var i = 0; i < this.length - index; i++) {
+                    this.swap(index + i, index + i + 1);
+                }
+
+            }
+
+
+        }
+        /**
+         *
+         *
+         * 数组下移
+         * @param index
+         */
+        Array.prototype.down = function (index) {
+            if (index != null && index >= 0 && index < this.length) {
+                if (index == this.length - 1) {
+                    return;
+                }
+                this.swap(index, index + 1);
+            }
+        };
+
+        /**
+         *
+         * 数组元素变为第一个元素
+         * @param index
+         */
+        Array.prototype.dips = function (index) {
+            if (index != null && index >= 0 && index < this.length) {
+                if (index == 0) {
+                    return;
+                }
+                this.swap(index, 0);
+            }
+        }
+
+        /**
+         *
+         *  数组元素变为最后一个元素
+         * @param index
+         */
+        Array.prototype.floats = function (index) {
+            if (index != null && index >= 0 && index < this.length) {
+                if (index == this.length - 1) {
+                    return;
+                }
+                this.swap(index, this.length - 1);
+            }
+        }
+
+        Array.prototype.find = function (val) {
+
+            if (this.length > 0) {
+
+
+                for (var i = 0; i < this.length; i++) {
+                    if (this[i] == val) {
+
+
+                        return i;
+                    }
+
+
+                }
+
+                return 'n';
+            }
+
+
+        }
+
+
+        Array.prototype.have = function (val) {
+            for (var i = 0; i < this.length; i++) {
+                if (this[i] == val) {
+                    return true;
+                }
+            }
+
+            return false;
+
+        }
+
+
+        /*
+         *  自定义二维数组
+         * @param a
+         * @param b
+         * @param m 默认值
+         * @returns {Array}
+         * @constructor
+         */
+        function Array2(a, b, m) {
+            var k = [];
+            k.length = a;
+            for (var i = 0; i < a; i++) {
+                k[i] = new Array();
+                k[i].length = b;
+            }
+            if (null != m) {
+                for (var k2 = 0; k2 < a; k2++) {
+                    for (var p = 0; p < b; p++) {
+                        k[k2][p] = m;
+                    }
+                }
+            }
+            return k;
+        }
+
+
+        /**
+         * 二维数组的遍历
+         * @param map
+         * @param action
+         */
+        function bl(map, action) {
+            if (map.length > 0 && map[0] != null) {
+                for (var k = 0; k < map.length; k++) {
+                    for (var p = 0; p < map[0].length; p++) {
+                        action(map[k][p], k, p);
+                    }
+                }
+            }
+        }
+        /**
+         *
+         * 随机整数
+         * @param a
+         * @returns {number}
+         */
+        function rmInt(a) {
+            return Math.floor(Math.random() * a);
+        }
+        /**
+         *
+         * 超级遍历
+         * @param map
+         * @param a
+         * @param a1
+         * @param b
+         * @param b1
+         * @param action
+         */
+        function blc(map, a, a1, b, b1, action) {
+
+            if (null != map && map.length > 0 && map[0] != null) {
+                for (var k = a; k < a1; k++) {
+                    for (var p = b; p < b1; p++) {
+                        action(map[k][p], k, p);
+                    }
+                }
+            }
+        }
+
+
+        CanvasRenderingContext2D.prototype.nGon = function (x, y, n, r, linw, fill, stroke) {
+            this.beginPath();
+            if (typeof stroke != "undefined") {
+                this.strokeStyle = stroke
+            } else {
+                this.strokeStyle = 'transparent';
+            }
+            if (typeof r === "undefined") {
+                r = 5;
+            }
+            if (typeof n === "undefined") {
+                n = 4;
+            }
+            if (typeof linw === "undefined") {
+                this.lineWidth = 1;
+            }
+            if (typeof fill != "undefined") {
+                this.fillStyle = fill;
+            } else {
+
+                this.fillStyle = 'transparent';
+            }
+            var i, ang;
+            ang = Math.PI * 2 / n;
+            this.save();
+            this.lineWidth = linw;
+            this.translate(x, y);
+            this.moveTo(0, -r);
+            this.beginPath();
+            for (i = 0; i < n; i++) {
+                this.rotate(ang);
+                this.lineTo(0, -r);
+            }
+//            this.closePath();
+//            this.fill();
+//            this.stroke();
+//            this.restore();
+
+
+        }
+        CanvasRenderingContext2D.prototype.roundrect =
+                function (x, y, width, height, radius, fill, stroke) {
+                    this.beginPath();
+                    if (typeof stroke != "undefined") {
+                        this.strokeStyle = stroke
+                    } else {
+                        this.strokeStyle = 'transparent';
+                    }
+                    if (typeof radius === "undefined") {
+                        radius = 5;
+                    }
+                    if (typeof fill != "undefined") {
+                        this.fillStyle = fill;
+                    } else {
+
+                        this.fillStyle = 'transparent';
+                    }
+                    this.moveTo(x + radius, y);
+                    this.lineTo(x + width - radius, y);
+                    this.quadraticCurveTo(x + width, y, x + width, y + radius);
+                    this.lineTo(x + width, y + height - radius);
+                    this.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+                    this.lineTo(x + radius, y + height);
+                    this.quadraticCurveTo(x, y + height, x, y + height - radius);
+                    this.lineTo(x, y + radius);
+                    this.quadraticCurveTo(x, y, x + radius, y);
+                    this.closePath();
+
+                    if (stroke) {
+                        this.stroke();
+                    }
+                    if (fill) {
+                        this.fill();
+                    }
+                };
+
+        CanvasRenderingContext2D.prototype.xuline = function (fromX, fromY, toX, toY, pattern, xw, color) {
+            // default interval distance -> 5px
+            if (typeof pattern === "undefined") {
+                pattern = 5;
+            }
+
+            // calculate the delta x and delta y
+            var dx = (toX - fromX);
+            var dy = (toY - fromY);
+            var distance = Math.floor(Math.sqrt(dx * dx + dy * dy));
+            var dashlineInteveral = (pattern <= 0) ? distance : (distance / pattern);
+            var deltay = (dy / distance) * pattern;
+            var deltax = (dx / distance) * pattern;
+
+            // draw dash line
+            this.beginPath();
+            this.lineWidth = xw;
+            this.strokeStyle = color;
+            for (var dl = 0; dl < dashlineInteveral; dl++) {
+                if (dl % 2) {
+                    this.lineTo(fromX + dl * deltax, fromY + dl * deltay);
+                } else {
+                    this.moveTo(fromX + dl * deltax, fromY + dl * deltay);
+                }
+            }
+            this.stroke();
+        };
+        ////绘图/////
+
+        var Draw = {
+
+            trace: function (val) {
+                alert(val);
+            },
+            print: function (val) {
+                console.log(val);
+
+            }, createImgDate: function (canv, p, p1) {
+
+                var ctx;
+                if ((typeof canv) == "string") {
+                    ctx = document.getElementById(canv);
+
+                } else if ((typeof canv) == "object" && canv != null) {
+                    ctx = canv;
+                }
+                try {
+                    if (p1.x > 0 && p1.y > 0) {
+                        var ctx = ctx.getContext("2d");
+                        var imgData = ctx.createImageData(p1.x, p1.y);
+                        return imgData;
+                    }
+
+                } catch (e) {
+                    Draw.trace("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                    Draw.print("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                }
+
+
+            },
+
+            /**
+             *
+             * 自定义形状图像的绘制带填充
+             * @param canv
+             * @param arr
+             * @param val
+             * @param linew
+             * @param color
+             */
+            fillShape: function (canv, arr, fill,stroke, linew,apl,shadow,tcx1,tcy1,ac) {
+                var ctx;
+                if ((typeof canv) == "string") {
+                    ctx = document.getElementById(canv);
+
+                } else if ((typeof canv) == "object" && canv != null) {
+                    ctx = canv;
+                }
+                try {
+                    var ctx = ctx.getContext("2d");
+                } catch (e) {
+                    Draw.trace("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                    Draw.print("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                }
+                try {
+                    if(arr!=null&&arr!=undefined&&arr.length>2) {
+                        ctx.beginPath();
+                        ctx.lineJoin = "round";
+                        ctx.moveTo(arr[0].x, arr[0].y);
+                        for (var k = 1; k < arr.length; k++) {
+                            ctx.lineTo(arr[k].x, arr[k].y);
+                        }
+
+                        if (tcx1 != undefined && tcy1 != undefined && tcx1 != null && tcy1 != null) {
+                            if (ctx.isPointInPath(tcx1, tcy1)) {
+                                ac();
+                            }
+                        }
+                        ctx.closePath();
+
+                        apl != null ? ctx.globalAlpha = apl : null;
+                        if (shadow != null) {
+                            ctx.shadowBlur = shadow.blur
+                            ctx.shadowColor = shadow.color;
+                            ctx.shadowOffsetX = shadow.offsetX;
+                            ctx.shadowOffsetY = shadow.offsetY;
+                        }
+
+                        ctx.strokeStyle = stroke;
+                        ctx.fillStyle = fill;
+                        ctx.lineWidth = linew;
+
+                        ctx.stroke();
+                        ctx.fill();
+                        ctx.globalAlpha = 1;
+                        ctx.shadowBlur = 0;
+                        ctx.shadowColor = null;
+                        ctx.shadowOffsetX = 0;
+                        ctx.shadowOffsetY = 0;
+
+                    }
+
+
+                } catch (e) {
+
+                    Draw.trace("提供的绘图信息有误！请查看参数设置!");
+                    Draw.print("提供的绘图信息有误！请查看参数设置!");
+
+                }
+            },
+            /**
+             *
+             *
+             * 自定义图形绘制未填充
+             * @param canv
+             * @param arr
+             * @param val
+             * @param linew
+             */
+            shape: function (canv, arr, stroke, linew, apl, shadow) {
+                var ctx;
+                if ((typeof canv) == "string") {
+                    ctx = document.getElementById(canv);
+
+                } else if ((typeof canv) == "object" && canv != null) {
+                    ctx = canv;
+                }
+                try {
+                    var ctx = ctx.getContext("2d");
+                } catch (e) {
+                    Draw.trace("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                    Draw.print("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                }
+                try {
+                    if(arr!=null&&arr!=undefined&&arr.length>2) {
+                        ctx.beginPath();
+                        ctx.lineJoin = "round";
+                        ctx.moveTo(arr[0].x, arr[0].y);
+                        for (var k = 1; k < arr.length; k++) {
+                            ctx.lineTo(arr[k].x, arr[k].y);
+                        }
+
+
+                        apl != null ? ctx.globalAlpha = apl : null;
+                        if (shadow != null) {
+                            ctx.shadowBlur = shadow.blur
+                            ctx.shadowColor = shadow.color;
+                            ctx.shadowOffsetX = shadow.offsetX;
+                            ctx.shadowOffsetY = shadow.offsetY;
+                        }
+
+                        ctx.strokeStyle = stroke;
+                        ctx.lineWidth = linew;
+
+                        ctx.stroke();
+                        ctx.globalAlpha = 1;
+                        ctx.shadowBlur = 0;
+                        ctx.shadowColor = null;
+                        ctx.shadowOffsetX = 0;
+                        ctx.shadowOffsetY = 0;
+                    }
+
+                } catch (e) {
+
+                    Draw.trace("提供的绘图信息有误！请查看参数设置!");
+                    Draw.print("提供的绘图信息有误！请查看参数设置!");
+
+                }
+            },
+
+            /**
+             *
+             *
+             * 清除方法
+             * @param canv
+             * @param x
+             * @param y
+             * @param w
+             * @param h
+             */
+            clear: function (canv, x, y, w, h) {
+                var ctx;
+                if ((typeof canv) == "string") {
+                    ctx = document.getElementById(canv);
+
+                } else if ((typeof canv) == "object" && canv != null) {
+                    ctx = canv;
+                }
+                try {
+                    var ctx = ctx.getContext("2d");
+                } catch (e) {
+                    Draw.trace("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                    Draw.print("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                }
+
+                ctx.clearRect(x, y, w, h);
+
+
+            },
+
+
+            /**
+             *
+             *
+             * 空心矩形
+             */
+            rect: function (canv, p1, p2, fill, color, linew, du, scalex, scaley, apl, shadow, spqx, czqx) {
+                var ctx;
+                if ((typeof canv) == "string") {
+                    ctx = document.getElementById(canv);
+
+                } else if ((typeof canv) == "object" && canv != null) {
+                    ctx = canv;
+                }
+                try {
+                    var jpan = ctx.getContext("2d");
+                } catch (e) {
+                    Draw.trace("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                    Draw.print("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                }
+                jpan.translate(p1.x + p2.x / 2, p1.y + p2.y / 2);
+                jpan.rotate(du * Math.PI / 180);
+                jpan.transform(scalex, czqx, spqx, scaley, 0, 0);
+                jpan.translate(-(p1.x + p2.x / 2), -(p1.y + p2.y / 2));
+                apl != null ? jpan.globalAlpha = apl : null;
+                if (shadow != null) {
+                    jpan.shadowBlur = shadow.blur
+                    jpan.shadowColor = shadow.color;
+                    jpan.shadowOffsetX = shadow.offsetX;
+                    jpan.shadowOffsetY = shadow.offsetY;
+                }
+                jpan.lineWidth = linew;
+                jpan.strokeStyle = color;
+                jpan.fillStyle = fill;
+                jpan.beginPath();
+                jpan.strokeRect(p1.x, p1.y, p2.x, p2.y);
+                jpan.fillRect(p1.x, p1.y, p2.x, p2.y)
+                jpan.globalAlpha = 1;
+                jpan.shadowBlur = 0;
+                jpan.shadowColor = null;
+                jpan.shadowOffsetX = 0;
+                jpan.shadowOffsetY = 0;
+                jpan.setTransform(1, 0, 0, 1, 0, 0);
+
+
+            },
+            rects: function (canv, color, p1, p2) {
+                var ctx;
+                if ((typeof canv) == "string") {
+                    ctx = document.getElementById(canv);
+
+                } else if ((typeof canv) == "object" && canv != null) {
+                    ctx = canv;
+                }
+                try {
+                    var jpan = ctx.getContext("2d");
+                } catch (e) {
+                    Draw.trace("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                    Draw.print("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                }
+
+
+                jpan.fillStyle = color;
+                jpan.beginPath();
+                jpan.fillRect(p1.x, p1.y, p2.x, p2.y);
+
+            },
+            /***
+             *
+             * 线
+             */
+            line: function (canv, linew, color, p1, p2, apl, shadow,tcx1,tcy1,ac) {
+
+                var ctx;
+                if ((typeof canv) == "string") {
+                    ctx = document.getElementById(canv);
+
+                } else if ((typeof canv) == "object" && canv != null) {
+                    ctx = canv;
+                }
+                try {
+                    var jpan = ctx.getContext("2d");
+                } catch (e) {
+                    Draw.trace("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                    Draw.print("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                }
+
+
+                apl != null ? jpan.globalAlpha = apl : null;
+                if (shadow != null) {
+                    jpan.shadowBlur = shadow.blur
+                    jpan.shadowColor = shadow.color;
+                    jpan.shadowOffsetX = shadow.offsetX;
+                    jpan.shadowOffsetY = shadow.offsetY;
+                }
+                jpan.lineWidth = linew;
+                jpan.strokeStyle = color;
+                jpan.beginPath();
+                jpan.moveTo(p1.x, p1.y);
+                jpan.lineTo(p2.x, p2.y);
+                if (tcx1 != undefined && tcy1 != undefined && tcx1 != null && tcy1 != null) {
+                    if (jpan.isPointInPath(tcx1, tcy1)) {
+                        ac();
+                    }
+                }
+                jpan.closePath();
+                jpan.stroke();
+                jpan.globalAlpha = 1;
+                jpan.shadowBlur = 0;
+                jpan.shadowColor = null;
+                jpan.shadowOffsetX = 0;
+                jpan.shadowOffsetY = 0;
+
+
+            },
+            /**
+             * 双控制点曲线
+             */
+            curves: function (canv, linew, color, p1, p2, p3, p4) {
+
+                var ctx;
+                if ((typeof canv) == "string") {
+                    ctx = document.getElementById(canv);
+
+                } else if ((typeof canv) == "object" && canv != null) {
+                    ctx = canv;
+                }
+                try {
+                    var jpan = ctx.getContext("2d");
+                } catch (e) {
+                    Draw.trace("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                    Draw.print("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                }
+
+
+                jpan.lineWidth = linew;
+                jpan.strokeStyle = color;
+                jpan.beginPath();
+                jpan.moveTo(p1.x, p1.y);
+                jpan.bezierCurveTo(p2.x, p2.y, p3.x, p3.y, p4.x, p4.y);
+                jpan.stroke();
+
+
+            },
+
+            /**
+             *
+             *单控制点曲线
+             *
+             */
+            curve: function (canv, linew, color, p1, p2, p3) {
+
+                var ctx;
+                if ((typeof canv) == "string") {
+                    ctx = document.getElementById(canv);
+
+                } else if ((typeof canv) == "object" && canv != null) {
+                    ctx = canv;
+                }
+                try {
+                    var jpan = ctx.getContext("2d");
+                } catch (e) {
+                    Draw.trace("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                    Draw.print("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                }
+
+
+                jpan.lineWidth = linew;
+                jpan.strokeStyle = color;
+                jpan.beginPath();
+                jpan.moveTo(p1.x, p1.y);
+                jpan.quadraticCurveTo(p2.x, p2.y, p3.x, p3.y);
+                jpan.stroke();
+
+            },
+            /*
+             * 绘制圆弧 空心圆弧
+             * 参数分别为x,y, 半径，起始角度，结尾角度，boolean（顺时针/逆时针)
+             */
+
+            crl: function (canv, linew, color, fill, p1, r, a3, a4, bool, apl, shadow) {
+
+                var ctx;
+                if ((typeof canv) == "string") {
+                    ctx = document.getElementById(canv);
+
+                } else if ((typeof canv) == "object" && canv != null) {
+                    ctx = canv;
+                }
+                try {
+                    var jpan = ctx.getContext("2d");
+                } catch (e) {
+                    Draw.trace("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                    Draw.print("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                }
+
+
+                apl != null ? jpan.globalAlpha = apl : null;
+                if (shadow != null) {
+                    jpan.shadowBlur = shadow.blur
+                    jpan.shadowColor = shadow.color;
+                    jpan.shadowOffsetX = shadow.offsetX;
+                    jpan.shadowOffsetY = shadow.offsetY;
+                }
+                jpan.lineWidth = linew;
+                jpan.strokeStyle = color;
+                jpan.fillStyle = fill;
+                jpan.beginPath();
+                jpan.arc(p1.x, p1.y, r, (a3 * Math.PI) / 180, (a4 * Math.PI) / 180, bool);
+                jpan.closePath();
+                jpan.stroke();
+                jpan.fill();
+                jpan.globalAlpha = 1;
+                jpan.shadowBlur = 0;
+                jpan.shadowColor = null;
+                jpan.shadowOffsetX = 0;
+                jpan.shadowOffsetY = 0;
+                jpan.setTransform(1, 0, 0, 1, 0, 0);
+
+
+            }, crls: function (canv, color, p1, r, a3, a4, bool) {
+
+                var ctx;
+                if ((typeof canv) == "string") {
+                    ctx = document.getElementById(canv);
+
+                } else if ((typeof canv) == "object" && canv != null) {
+                    ctx = canv;
+                }
+                try {
+                    var jpan = ctx.getContext("2d");
+                } catch (e) {
+                    Draw.trace("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                    Draw.print("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                }
+                jpan.fillStyle = color;
+                jpan.beginPath();
+                jpan.arc(p1.x, p1.y, r, (a3 * Math.PI) / 180, (a4 * Math.PI) / 180, bool);
+                jpan.fill();
+
+
+            },
+            /**
+             *
+             *
+             *
+             *
+             *  * 参数依次是
+             * 字符串，x,y,大小,类型,对齐方式
+             * 常用类型有Arial,Verdana,Times New Roman,serif,sans-serif,
+             * 对齐方式有 center, end left right, start textBaseline(竖直方向)
+             *
+             *
+             * @param {Object} str
+             * @param {Object} x
+             * @param {Object} y
+             * @param {Object} size
+             * @param {Object} kind
+             * @param {Object} alg
+             * @param canv
+             */
+            word: function (canv, kx, gradient, str, x, y, size, kind, alg, color) {
+                var ctx;
+                if ((typeof canv) == "string") {
+                    ctx = document.getElementById(canv);
+
+                } else if ((typeof canv) == "object" && canv != null) {
+                    ctx = canv;
+                }
+                try {
+                    var jpan = ctx.getContext("2d");
+                } catch (e) {
+                    Draw.trace("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                    Draw.print("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                }
+                jpan.beginPath();
+                jpan.font = size + "px " + kind;
+                jpan.textAlign = alg;
+
+                jpan.fillStyle = color;
+                jpan.fillText(str, x, y);
+
+                jpan.strokeStyle = gradient;
+                jpan.strokeText(str, x, y);
+
+
+            }, roundRect: function (canv, x, y, width, height, radius, stroke, fill) {
+                var ctx;
+                if ((typeof canv) == "string") {
+                    ctx = document.getElementById(canv);
+
+                } else if ((typeof canv) == "object" && canv != null) {
+                    ctx = canv;
+                }
+                try {
+                    var paint = ctx.getContext("2d");
+                } catch (e) {
+                    Draw.trace("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                    Draw.print("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                }
+                paint.roundrect(x, y, width, height, radius, fill, stroke);
+
+
+            }, filterX: function (canv, x, y, x1, y1, arr) {
+                var ctx;
+                if ((typeof canv) == "string") {
+                    ctx = document.getElementById(canv);
+
+                } else if ((typeof canv) == "object" && canv != null) {
+                    ctx = canv;
+                }
+                try {
+                    var ctx = ctx.getContext("2d");
+                } catch (e) {
+                    Draw.trace("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                    Draw.print("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                }
+                var grd = ctx.createLinearGradient(x, y, x1, y1);
+
+                for (var i = 0; i < arr.length; i++) {
+                    if (arr[i].pd >= 0 && arr[i].pd <= 1) {
+                        grd.addColorStop(arr[i].pd, arr[i].color);
+
+                    }
+
+                }
+
+
+                return grd;
+            },
+
+            /**
+             *
+             *
+             * 放射状滤镜
+             * @param canv
+             * @param p1
+             * @param p2
+             * @param r1
+             * @param r2
+             * @param arr
+             * @returns {CanvasGradient}
+             */
+            filterR: function (canv, x, y, x1, y1, r1, r2, arr) {
+
+
+                var ctx;
+                if ((typeof canv) == "string") {
+                    ctx = document.getElementById(canv);
+
+                } else if ((typeof canv) == "object" && canv != null) {
+                    ctx = canv;
+                }
+                try {
+                    var ctx = ctx.getContext("2d");
+                } catch (e) {
+                    Draw.trace("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                    Draw.print("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                }
+
+                var grd = ctx.createRadialGradient(x, y, r1, x1, y1, r2);
+                for (var i = 0; i < arr.length; i++) {
+                    if (arr[i].pd >= 0 && arr[i].pd <= 1) {
+                        grd.addColorStop(arr[i].pd, arr[i].color);
+
+                    }
+
+                }
+                return grd;
+            }, nGon: function (canv, x, y, n, r, du, linw, fill, stroke, apl, shadow, tcx1, tcy1, ac) {
+
+                var ctx;
+                if ((typeof canv) == "string") {
+                    ctx = document.getElementById(canv);
+
+                } else if ((typeof canv) == "object" && canv != null) {
+                    ctx = canv;
+                }
+                try {
+                    var paint = ctx.getContext("2d");
+                } catch (e) {
+                    Draw.trace("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                    Draw.print("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                }
+
+                apl != null ? paint.globalAlpha = apl : null;
+                if (shadow != null) {
+                    paint.shadowBlur = shadow.blur
+                    paint.shadowColor = shadow.color;
+                    paint.shadowOffsetX = shadow.offsetX;
+                    paint.shadowOffsetY = shadow.offsetY;
+                }
+                paint.translate(x, y);
+                paint.rotate(du);
+
+                paint.translate(-(x), -(y));
+                paint.beginPath();
+                paint.fillStyle = fill;
+                paint.strokeStyle = stroke;
+                paint.nGon(x, y, n, r, linw, fill, stroke);
+                if (tcx1 != undefined && tcy1 != undefined && tcx1 != null && tcy1 != null) {
+                    if (paint.isPointInPath(tcx1, tcy1)) {
+                        ac();
+                    }
+                }
+                paint.closePath();
+                paint.fill();
+                paint.stroke();
+                paint.restore();
+
+
+                paint.globalAlpha = 1;
+                paint.shadowBlur = 0;
+                paint.shadowColor = null;
+                paint.shadowOffsetX = 0;
+                paint.shadowOffsetY = 0;
+                paint.setTransform(1, 0, 0, 1, 0, 0);
+
+
+            }, nStar: function (canv, x, y, n, r, fill, stroke, linw, du, apl, shadow,tcx1,tcy1,ac) {
+
+                var cw;
+                if ((typeof canv) == "string") {
+                    cw = document.getElementById(canv);
+
+                } else if ((typeof canv) == "object" && canv != null) {
+                    cw = canv;
+                }
+                try {
+                    var ctx = cw.getContext("2d");
+                } catch (e) {
+                    Draw.trace("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                    Draw.print("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                }
+
+
+                apl != null ? ctx.globalAlpha = apl : null;
+                if (shadow != null) {
+                    ctx.shadowBlur = shadow.blur
+                    ctx.shadowColor = shadow.color;
+                    ctx.shadowOffsetX = shadow.offsetX;
+                    ctx.shadowOffsetY = shadow.offsetY;
+                }
+                ctx.translate(x, y);
+                ctx.rotate(du);
+                ctx.lineWidth=linw;
+                ctx.strokeStyle = stroke;
+                ctx.fillStyle = fill;
+                ctx.translate(-(x), -(y));
+                var deg = getDegree(n);
+                ctx.beginPath();
+                for (var i = 0; i < n; i++) {
+                    var sintheta = Math.sin(deg * i);
+                    var costheta = Math.cos(deg * i);
+                    ctx.lineTo(x + r * sintheta, y + r * costheta);
+                }
+
+                if (tcx1 != undefined && tcy1 != undefined && tcx1 != null && tcy1 != null) {
+                    if (ctx.isPointInPath(tcx1, tcy1)) {
+                        ac();
+                    }
+                }
+                ctx.closePath();
+                ctx.stroke();
+                ctx.fill();
+                ctx.globalAlpha = 1;
+                ctx.shadowBlur = 0;
+                ctx.shadowColor = null;
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = 0;
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+
+                function getDegree(n) {
+                    for (var k = Math.ceil(n / 4); k < n; k++) {
+                        var flag = [];
+                        var current = 0;
+                        initArr(flag, 1, n);
+                        for (var j = 0; j < n; j++) {
+                            flag[current] = 0;
+                            current = (current + k) % n;
+                            if (sum(flag, n) === 0) {
+                                return k * Math.PI * 2 / n;
+                            }
+                        }
+                    }
+                    return -1;
+                }
+
+                function initArr(arr, value, count) {
+                    for (var i = 0; i < count; i++) {
+                        arr[i] = value;
+                    }
+                }
+
+                function sum(arr, n) {
+                    var sum = 0;
+                    for (var i = 0; i < n; i++) {
+                        sum = sum + arr[i];
+                    }
+                    return sum;
+                }
+
+
+            }
+
+
+            ,
+            pic: function (canv, image, p, w, h, du, apl, shadow, scalex, scaley, spqx, czqx) {
+                var ctx;
+                if ((typeof canv) == "string") {
+                    ctx = document.getElementById(canv);
+
+                } else if ((typeof canv) == "object" && canv != null) {
+                    ctx = canv;
+                }
+                try {
+                    var paint = ctx.getContext("2d");
+                } catch (e) {
+                    Draw.trace("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                    Draw.print("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                }
+
+                paint.translate(p.x + w / 2, p.y + h / 2);
+                paint.rotate(du * Math.PI / 180);
+                if (czqx == null || czqx == "") {
+                    czqx = 0;
+                }
+                if (spqx == null || spqx == "") {
+                    spqx = 0;
+                }
+                paint.transform(scalex, czqx, spqx, scaley, 0, 0);
+                apl != null ? paint.globalAlpha = apl : null;
+                if (shadow != null) {
+                    paint.shadowBlur = shadow.blur
+                    paint.shadowColor = shadow.color;
+                    paint.shadowOffsetX = shadow.offsetX;
+                    paint.shadowOffsetY = shadow.offsetY;
+                }
+
+                paint.translate(-(p.x + w / 2), -(p.y + h / 2));
+
+                paint.beginPath();
+
+                paint.drawImage(image, p.x, p.y, w, h);
+
+                paint.globalAlpha = 1;
+                paint.shadowBlur = 0;
+                paint.shadowColor = null;
+                paint.shadowOffsetX = 0;
+                paint.shadowOffsetY = 0;
+
+                paint.setTransform(1, 0, 0, 1, 0, 0);
+
+            },
+            img: function (canv, image, xz, yz, du, scalex, scaley, apl, shadow, spqx, czqx) {
+                var ctx;
+                if ((typeof canv) == "string") {
+                    ctx = document.getElementById(canv);
+
+                } else if ((typeof canv) == "object" && canv != null) {
+                    ctx = canv;
+                }
+                try {
+                    var paint = ctx.getContext("2d");
+                } catch (e) {
+                    Draw.trace("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                    Draw.print("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                }
+
+                paint.translate(xz + image.width / 2, yz + image.height / 2);
+                paint.rotate(du * Math.PI / 180);
+                if (czqx == null || czqx == "") {
+                    czqx = 0;
+                }
+                if (spqx == null || spqx == "") {
+                    spqx = 0;
+                }
+                paint.transform(scalex, czqx, spqx, scaley, 0, 0);
+                apl != null ? paint.globalAlpha = apl : null;
+                if (shadow != null) {
+                    paint.shadowBlur = shadow.blur
+                    paint.shadowColor = shadow.color;
+                    paint.shadowOffsetX = shadow.offsetX;
+                    paint.shadowOffsetY = shadow.offsetY;
+                }
+
+                paint.translate(-(xz + image.width / 2), -(yz + image.height / 2));
+
+                paint.beginPath();
+
+                paint.drawImage(image, xz, yz, image.width, image.height);
+
+                paint.globalAlpha = 1;
+                paint.shadowBlur = 0;
+                paint.shadowColor = null;
+                paint.shadowOffsetX = 0;
+                paint.shadowOffsetY = 0;
+
+                paint.setTransform(1, 0, 0, 1, 0, 0);
+
+            }, path: function (canv, x, y, w, h, du, jg, xw, color, scalex, scaley, spqx, czqx, hitx, hity) {
+
+                var ctx;
+                if ((typeof canv) == "string") {
+                    ctx = document.getElementById(canv);
+
+                } else if ((typeof canv) == "object" && canv != null) {
+                    ctx = canv;
+                }
+                try {
+                    var paint = ctx.getContext("2d");
+                } catch (e) {
+                    Draw.trace("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                    Draw.print("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                }
+                paint.translate(x + w / 2, y + h / 2);
+                paint.rotate(du * Math.PI / 180);
+
+                if (czqx == null || czqx == "") {
+                    czqx = 0;
+                }
+                if (spqx == null || spqx == "") {
+                    spqx = 0;
+                }
+                paint.transform(scalex, czqx, spqx, scaley, 0, 0);
+                paint.translate(-(x + w / 2), -(y + h / 2));
+
+                paint.beginPath();
+                paint.rect(x, y, w, h);
+                if (paint.isPointInPath(hitx, hity)) {
+                    paint.lineWidth = 1;
+                    paint.strokeStyle = "orange";
+                    paint.stroke();
+                    paint.beginPath();
+                    paint.xuline(x, y, x + w, y, jg, xw, color);
+                    paint.xuline(x + w, y, x + w, y + h, jg, xw, color);
+                    paint.xuline(x + w, y + h, x, y + h, jg, xw, color);
+                    paint.xuline(x, y + h, x, y, jg, xw, color);
+                    paint.setTransform(1, 0, 0, 1, 0, 0);
+                    return true;
+                } else {
+                    paint.setTransform(1, 0, 0, 1, 0, 0);
+                    return false;
+
+
+                }
+
+
+            }, video: function (canv, xz, yz, width, height, du, src, id) {
+                var ctx;
+
+                if ((typeof canv) == "string") {
+                    ctx = document.getElementById(canv);
+
+                } else if ((typeof canv) == "object" && canv != null) {
+                    ctx = canv;
+                }
+                try {
+                    var paint = ctx.getContext("2d");
+                } catch (e) {
+                    Draw.trace("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                    Draw.print("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                }
+
+                if (document.getElementById(id) == null) {
+                    var videos = document.createElement("video");
+                    videos.innerHTML = '<video  id="' + id + '" autoplay="true" loop="true"  style="display: none"><source src=' + src + 'type="video/mp4"></video>';
+                    document.body.appendChild(videos);
+                }
+                var video1 = document.getElementById(id);
+                paint.translate(xz + width / 2, yz + height / 2);
+                paint.rotate(du * Math.PI / 180);
+                paint.translate(-(xz + width / 2), -(yz + height / 2));
+                paint.beginPath();
+                paint.drawImage(video1, xz, yz, width, height);
+                paint.setTransform(1, 0, 0, 1, 0, 0);
+
+            }, getImg: function (canv, x, y, w, h) {
+
+                var ctx;
+
+                if ((typeof canv) == "string") {
+                    ctx = document.getElementById(canv);
+
+                } else if ((typeof canv) == "object" && canv != null) {
+                    ctx = canv;
+                }
+                try {
+                    var paint = ctx.getContext("2d");
+                } catch (e) {
+                    Draw.trace("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                    Draw.print("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                }
+
+                return paint.getImageData(x, y, w, h);
+
+
+            }, putImg: function (canv, imgdata, p1, w, h, p2) {
+                var ctx;
+
+                if ((typeof canv) == "string") {
+                    ctx = document.getElementById(canv);
+
+                } else if ((typeof canv) == "object" && canv != null) {
+                    ctx = canv;
+                }
+                try {
+                    var paint = ctx.getContext("2d");
+                } catch (e) {
+                    Draw.trace("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                    Draw.print("提供的画布信息有误！请查看画布设置，或画布的id信息是否有误!");
+                }
+
+                if (p2.x > 0 && p2.y > 0) {
+                    paint.putImageData(imgdata, p1.x, p1.y, w, h, p2.x, p2.y);
+
+                }
+            }
+
+
+        }
+
+        var filter = {
+
+            /**
+             * invert color value of pixel, new pixel = RGB(255-r, 255-g, 255 - b)
+             *颜色反转
+             * @param binaryData - canvas's imagedata.data
+             * @param l - length of data (width * height of image data)
+             */
+            colorInvertProcess: function (binaryData, l) {
+                for (var i = 0; i < l; i += 4) {
+                    var r = binaryData[i];
+                    var g = binaryData[i + 1];
+                    var b = binaryData[i + 2];
+
+                    binaryData[i] = 255 - r;
+                    binaryData[i + 1] = 255 - g;
+                    binaryData[i + 2] = 255 - b;
+                }
+
+            },
+            colrfz: function (binaryData, l) {
+                for (var i = 0; i < l; i += 4) {
+                    var r = binaryData.data[i];
+                    var g = binaryData.data[i + 1];
+                    var b = binaryData.data[i + 2];
+
+                    binaryData.data[i] = 255 - r;
+                    binaryData.data[i + 1] = 255 - g;
+                    binaryData.data[i + 2] = 255 - b;
+                }
+
+            },
+            haibai: function (binaryData, l) {
+                var vag = 0;
+                for (var i = 0; i < l; i += 4) {
+                    var r = binaryData.data[i];
+                    var g = binaryData.data[i + 1];
+                    var b = binaryData.data[i + 2];
+                    vag = r + g + b;
+                    if (vag >= 100) {
+                        binaryData.data[i] = 255;
+                        binaryData.data[i + 1] = 255;
+                        binaryData.data[i + 2] = 255;
+                    } else {
+                        binaryData.data[i] = 0;
+                        binaryData.data[i + 1] = 0;
+                        binaryData.data[i + 2] = 0;
+
+
+                    }
+                }
+
+
+            },
+
+
+            /**
+             * adjust color values and make it more darker and gray...
+             *灰度的应用
+             * @param binaryData
+             * @param l
+             */
+            colorAdjustProcess: function (binaryData, l) {
+                for (var i = 0; i < l; i += 4) {
+                    var r = binaryData[i];
+                    var g = binaryData[i + 1];
+                    var b = binaryData[i + 2];
+
+                    binaryData[i] = (r * 0.272) + (g * 0.534) + (b * 0.131);
+                    binaryData[i + 1] = (r * 0.349) + (g * 0.686) + (b * 0.168);
+                    binaryData[i + 2] = (r * 0.393) + (g * 0.769) + (b * 0.189);
+                }
+
+            },
+            huidu: function (binaryData, l) {
+                console.log("Canvas Filter - huidu");
+
+                for (var i = 0; i < l; i += 4) {
+                    var r = binaryData.data[i];
+                    var g = binaryData.data[i + 1];
+                    var b = binaryData.data[i + 2];
+
+                    binaryData.data[i] = (r * 0.272) + (g * 0.534) + (b * 0.131);
+                    binaryData.data[i + 1] = (r * 0.349) + (g * 0.686) + (b * 0.168);
+                    binaryData.data[i + 2] = (r * 0.393) + (g * 0.769) + (b * 0.189);
+                }
+            }, huidu1: function (binaryData, l) {
+                console.log("Canvas Filter - huidu");
+                var kp = 0;
+                for (var i = 0; i < l; i += 4) {
+                    var r = binaryData.data[i];
+                    var g = binaryData.data[i + 1];
+                    var b = binaryData.data[i + 2];
+                    kp = (r + g + b) / 3
+                    binaryData.data[i] = kp;
+                    binaryData.data[i + 1] = kp;
+                    binaryData.data[i + 2] = kp;
+                }
+            },
+            huidu2: function (binaryData, l) {
+                console.log("Canvas Filter - huidu");
+
+                for (var i = 0; i < l; i += 4) {
+                    var r = binaryData.data[i];
+                    var g = binaryData.data[i + 1];
+                    var b = binaryData.data[i + 2];
+
+                    binaryData.data[i] = 235;
+                }
+            },
+
+            /**
+             * deep clone image data of canvas
+             *
+             * @param context
+             * @param src
+             * @returns
+             */
+            copyImageData: function (context, src) {
+                var dst = context.createImageData(src.width, src.height);
+                dst.data.set(src.data);
+                return dst;
+            },
+
+            /**
+             * convolution - keneral size 5*5 - blur effect filter(模糊效果)
+             *模糊应用
+             * @param context
+             * @param canvasData
+             */
+            blurProcess: function (context, canvasData) {
+                console.log("Canvas Filter - blur process");
+                var tempCanvasData = this.copyImageData(context, canvasData);
+                var sumred = 0.0, sumgreen = 0.0, sumblue = 0.0;
+                for (var x = 0; x < tempCanvasData.width; x++) {
+                    for (var y = 0; y < tempCanvasData.height; y++) {
+
+                        // Index of the pixel in the array
+                        var idx = (x + y * tempCanvasData.width) * 4;
+                        for (var subCol = -2; subCol <= 2; subCol++) {
+                            var colOff = subCol + x;
+                            if (colOff < 0 || colOff >= tempCanvasData.width) {
+                                colOff = 0;
+                            }
+                            for (var subRow = -2; subRow <= 2; subRow++) {
+                                var rowOff = subRow + y;
+                                if (rowOff < 0 || rowOff >= tempCanvasData.height) {
+                                    rowOff = 0;
+                                }
+                                var idx2 = (colOff + rowOff * tempCanvasData.width) * 4;
+                                var r = tempCanvasData.data[idx2 + 0];
+                                var g = tempCanvasData.data[idx2 + 1];
+                                var b = tempCanvasData.data[idx2 + 2];
+                                sumred += r;
+                                sumgreen += g;
+                                sumblue += b;
+                            }
+                        }
+
+                        // calculate new RGB value
+                        var nr = (sumred / 25.0);
+                        var ng = (sumgreen / 25.0);
+                        var nb = (sumblue / 25.0);
+
+                        // clear previous for next pixel point
+                        sumred = 0.0;
+                        sumgreen = 0.0;
+                        sumblue = 0.0;
+
+                        // assign new pixel value
+                        canvasData.data[idx + 0] = nr; // Red channel
+                        canvasData.data[idx + 1] = ng; // Green channel
+                        canvasData.data[idx + 2] = nb; // Blue channel
+                        canvasData.data[idx + 3] = 255; // Alpha channel
+                    }
+                }
+            },
+
+            /**
+             * after pixel value - before pixel value + 128
+             * 浮雕效果
+             */
+            reliefProcess: function (context, canvasData) {
+                console.log("Canvas Filter - relief process");
+                var tempCanvasData = this.copyImageData(context, canvasData);
+                for (var x = 1; x < tempCanvasData.width - 1; x++) {
+                    for (var y = 1; y < tempCanvasData.height - 1; y++) {
+
+                        // Index of the pixel in the array
+                        var idx = (x + y * tempCanvasData.width) * 4;
+                        var bidx = ((x - 1) + y * tempCanvasData.width) * 4;
+                        var aidx = ((x + 1) + y * tempCanvasData.width) * 4;
+
+                        // calculate new RGB value
+                        var nr = tempCanvasData.data[aidx + 0] - tempCanvasData.data[bidx + 0] + 128;
+                        var ng = tempCanvasData.data[aidx + 1] - tempCanvasData.data[bidx + 1] + 128;
+                        var nb = tempCanvasData.data[aidx + 2] - tempCanvasData.data[bidx + 2] + 128;
+                        nr = (nr < 0) ? 0 : ((nr > 255) ? 255 : nr);
+                        ng = (ng < 0) ? 0 : ((ng > 255) ? 255 : ng);
+                        nb = (nb < 0) ? 0 : ((nb > 255) ? 255 : nb);
+
+                        // assign new pixel value
+                        canvasData.data[idx + 0] = nr; // Red channel
+                        canvasData.data[idx + 1] = ng; // Green channel
+                        canvasData.data[idx + 2] = nb; // Blue channel
+                        canvasData.data[idx + 3] = 255; // Alpha channel
+                    }
+                }
+            },
+
+            /**
+             *    before pixel value - after pixel value + 128
+             *  雕刻效果
+             *
+             * @param canvasData
+             */
+            diaokeProcess: function (context, canvasData) {
+                console.log("Canvas Filter - process");
+                var tempCanvasData = this.copyImageData(context, canvasData);
+                for (var x = 1; x < tempCanvasData.width - 1; x++) {
+                    for (var y = 1; y < tempCanvasData.height - 1; y++) {
+
+                        // Index of the pixel in the array
+                        var idx = (x + y * tempCanvasData.width) * 4;
+                        var bidx = ((x - 1) + y * tempCanvasData.width) * 4;
+                        var aidx = ((x + 1) + y * tempCanvasData.width) * 4;
+
+                        // calculate new RGB value
+                        var nr = tempCanvasData.data[bidx + 0] - tempCanvasData.data[aidx + 0] + 128;
+                        var ng = tempCanvasData.data[bidx + 1] - tempCanvasData.data[aidx + 1] + 128;
+                        var nb = tempCanvasData.data[bidx + 2] - tempCanvasData.data[aidx + 2] + 128;
+                        nr = (nr < 0) ? 0 : ((nr > 255) ? 255 : nr);
+                        ng = (ng < 0) ? 0 : ((ng > 255) ? 255 : ng);
+                        nb = (nb < 0) ? 0 : ((nb > 255) ? 255 : nb);
+
+                        // assign new pixel value
+                        canvasData.data[idx + 0] = nr; // Red channel
+                        canvasData.data[idx + 1] = ng; // Green channel
+                        canvasData.data[idx + 2] = nb; // Blue channel
+                        canvasData.data[idx + 3] = 255; // Alpha channel
+                    }
+                }
+            },
+
+            /**
+             * mirror reflect
+             *镜像效果
+             * @param context
+             * @param canvasData
+             */
+            mirrorProcess: function (context, canvasData) {
+                console.log("Canvas Filter - process");
+                var tempCanvasData = this.copyImageData(context, canvasData);
+                for (var x = 0; x < tempCanvasData.width; x++) // column
+                {
+                    for (var y = 0; y < tempCanvasData.height; y++) // row
+                    {
+
+                        // Index of the pixel in the array
+                        var idx = (x + y * tempCanvasData.width) * 4;
+                        var midx = (((tempCanvasData.width - 1) - x) + y * tempCanvasData.width) * 4;
+
+                        // assign new pixel value
+                        canvasData.data[midx + 0] = tempCanvasData.data[idx + 0]; // Red channel
+                        canvasData.data[midx + 1] = tempCanvasData.data[idx + 1];
+                        ; // Green channel
+                        canvasData.data[midx + 2] = tempCanvasData.data[idx + 2];
+                        ; // Blue channel
+                        canvasData.data[midx + 3] = 255; // Alpha channel
+                    }
+                }
+            },
+        };
+
+
+        function getMousePos(canvas, evt) {
+            var rect = canvas.getBoundingClientRect();
+            return {
+                x: evt.clientX - rect.left * (canvas.width / rect.width),
+                y: evt.clientY - rect.top * (canvas.height / rect.height)
+            }
+        }
+
+
+        function DD() {
+            this.shape = '';
+            this.arr = [];
+            this.p = new point(0, 0);
+            this.p1 = new point(0, 0);
+            this.p2 = new point(0, 0);
+            this.linew = 1;
+            this.fill = 'red';
+            this.stroke = 'blue';
+            this.shadow = new shadow(5, 'red', 0, 0);
+            this.startKg = false;
+            this.rectKg = false;
+            this.lineKg = false;
+            this.panKg = false;
+            this.crlKg = false;
+            this.xpKg = false;
+            this.quKg = false;
+            this.dbxKg = false;
+            this.apl = 1;
+            this.r = 0;
+            this.n = 5;
+            this.du = 0;
+            this.data = null;
+            this.img = new Image();
+            this.alg = null;
+            this.kind = null;
+            this.wzKg = false;
+            this.text = '';
+        }
+
+        function shadow(blur, color, offsetx, offsety) {
+
+
+            this.blur = blur;
+            this.color = color;
+            this.offsetX = offsetx;
+            this.offsetY = offsety;
+        }
+        var D = new DD();
+
+        function getshape() {
+            var k = document.getElementById('sel').value;
+            D.shape = k;
+            if (k != '选择' && k != '复制') {
+                D.xzKg == true ? D.xzKg = false : D.xzKg = false;
+                cana.width = 0;
+                cana.height = 0;
+                cana.style.top = '0px';
+            }
+            if (k == '图片') {
+                D.img = new Image();
+                D.img.src = picpath;
+            }
+
+            if (k == '文字') {
+                document.getElementById('word').style.display = 'block';
+            } else {
+                document.getElementById('word').style.display = 'none';
+            }
+            return k;
+        }
+        function getStrcol() {
+            D.stroke = document.getElementById("strCol").value;
+            flkg1 = false;
+            document.getElementById("bktm").style.background = 'pink'
+        }
+        function getFillcol() {
+
+            D.fill = document.getElementById("filCol").value;
+            flkg = false;
+            document.getElementById("tctm").style.background = 'pink';
+        }
+
+        function getLinew() {
+            D.linew = document.getElementById("linew").value;
+
+        }
+        function getBlurw() {
+            D.shadow.blur = document.getElementById("blurw").value;
+
+        }
+        function getBlurcolor() {
+            D.shadow.color = document.getElementById("blurColor").value;
+
+        }
+        function getApl() {
+            D.apl = (document.getElementById("apl").value) / 100;
+
+        }
+
+
+        function getWgw() {
+
+            wgwidth = (document.getElementById("wgw").value);
+
+        }
+        function saveShape(ss) {
+            if (ss == undefined || ss == null) {
+                var d = new DD();
+                for (var s in D) {
+                    d[s] = D[s]
+                }
+                d.shadow = new shadow(D.shadow.blur, D.shadow.color, D.shadow.offsetx, D.shadow.offsety);
+                d.arr = new Array();
+                d.arr.length = D.arr.length;
+                for (var i in D.arr) {
+                    d.arr[i] = D.arr[i];
+                }
+                d.img = new Image();
+                d.img.src = D.img.src;
+
+                shapeArray.push(d);
+            } else {
+
+                shapeArray.push(ss);
+            }
+        }
+
+        function getPx(p, p1) {
+
+
+            return Draw.getImg(can, p.x, p.y, p1.x, p1.y);
+        }
+        function saveSelect(d) {
+            if (d) {
+                selectArray.push(d);
+            }
+        }
+
+        function quse(x, y) {
+
+            var s = Math.floor(x / 10);
+            var s1 = Math.floor(y / 10);
+            var k = s1 * 25 + s;
+            // alert(k-1);
+            return colorS[k - 1];
+
+        }
+        var dkg = 0;
+
+
+        addEventListener('mousedown', function (e) {
+
+            if (inpanl(canC, e)) {
+                var xc = getMousePos(canC, e).x;
+                var yc = getMousePos(canC, e).y;
+                nowColor = quse(xc - 10, yc);
+
+                document.getElementById('filCol').value = nowColor;
+            }
+            if (inpanl(can, e)) {
+                pxdata = null;
+
+                switch (D.shape) {
+
+                    case '矩形':
+                        D.startKg = true;
+                        var x1 = getMousePos(can, e).x;
+                        var y1 = getMousePos(can, e).y;
+                        D.p = new point(x1, y1)
+
+                        break;
+                    case '文字':
+                        D.startKg = true;
+                        var x1 = getMousePos(can, e).x;
+                        var y1 = getMousePos(can, e).y;
+                        D.p = new point(x1, y1);
+                        words.style.left = e.clientX + 'px';
+                        words.style.top = e.clientY + 'px';
+                        break;
+                    case '图片':
+
+                            if(picpath==null){
+                                alert("请先上传图片");
+                            }else{
+                                D.startKg = true;
+                                D.img.src = picpath;
+                                var x1 = getMousePos(can, e).x;
+                                var y1 = getMousePos(can, e).y;
+                                D.p = new point(x1, y1)
+                            }
+
+
+
+                        break;
+                    case '选择':
+
+
+                        D.startKg = true;
+                        var x1 = getMousePos(can, e).x;
+                        var y1 = getMousePos(can, e).y;
+                        D.p = new point(x1, y1)
+                        cana.style.left = e.clientX + 'px';
+                        cana.style.top = e.clientY + 'px';
+
+                        break;
+                    case '复制':
+
+
+                        D.startKg = true;
+                        var x1 = getMousePos(can, e).x;
+                        var y1 = getMousePos(can, e).y;
+                        D.p = new point(x1, y1)
+                        cana.style.left = e.clientX + 'px';
+                        cana.style.top = e.clientY + 'px';
+
+                        break;
+                    case '橡皮':
+                        D.startKg = true;
+                        var x1 = getMousePos(can, e).x;
+                        var y1 = getMousePos(can, e).y;
+                        D.p = new point(x1, y1)
+
+
+                        break;
+
+                    case '圆形':
+                        D.startKg = true;
+                        var x1 = getMousePos(can, e).x;
+                        var y1 = getMousePos(can, e).y;
+                        D.p = new point(x1, y1)
+
+                        break;
+                    case '多边形':
+                        D.startKg = true;
+                        var x1 = getMousePos(can, e).x;
+                        var y1 = getMousePos(can, e).y;
+                        D.p = new point(x1, y1)
+                        break;
+                    case '多角形':
+                        D.startKg = true;
+                        var x1 = getMousePos(can, e).x;
+                        var y1 = getMousePos(can, e).y;
+                        D.p = new point(x1, y1)
+                        break;
+
+                    case '直线':
+                        D.startKg = true;
+                        var x1 = getMousePos(can, e).x;
+                        var y1 = getMousePos(can, e).y;
+                        D.p = new point(x1, y1)
+                        break;
+                    case '铅笔':
+                        D.startKg = true;
+                        var x1 = getMousePos(can, e).x;
+                        var y1 = getMousePos(can, e).y;
+                        D.p = new point(x1, y1)
+                        break;
+                    case 'shape':
+                        D.startKg = true;
+                        var x1 = getMousePos(can, e).x;
+                        var y1 = getMousePos(can, e).y;
+                        D.p = new point(x1, y1)
+                        break;
+                    case '填充':
+                        tczkg = true;
+
+                        break;
+                    case '曲线':
+
+                        if (dkg == 0) {
+                            D.startKg = true;
+                            var x1 = getMousePos(can, e).x;
+                            var y1 = getMousePos(can, e).y;
+                            D.p = new point(x1, y1);
+                            dkg += 1;
+                        } else {
+                            var x2 = getMousePos(can, e).x;
+                            var y2 = getMousePos(can, e).y;
+                            D.p1 = new point(x2, y2);
+                            saveShape();
+                            dkg = 0;
+                            D.quKg = false;
+                        }
+
+                        break;
+                }
+
+            }
+        });
+
+        addEventListener('mouseup', function (e) {
+            D.startKg = false;
+            tczkg = false;
+            if (D.rectKg) {
+
+
+                D.rectKg = false;
+                saveShape();
+
+
+            }
+            if (D.wzKg) {
+
+
+            }
+            if (D.tuKg) {
+
+
+                D.tuKg = false;
+                saveShape();
+
+
+            }
+
+            if (D.crlKg) {
+
+
+                D.crlKg = false;
+                saveShape();
+
+
+            }
+            if (D.dbxKg) {
+
+
+                D.dbxKg = false;
+                saveShape();
+
+
+            }
+            if (D.djxKg) {
+
+
+                D.djxKg = false;
+                saveShape();
+
+
+            }
+
+            if (D.lineKg) {
+
+
+                D.lineKg = false;
+                saveShape();
+
+
+            }
+            if (D.panKg) {
+
+
+                D.panKg = false;
+                saveShape();
+                D.arr = [];
+
+            }
+            if (D.shapeKg) {
+
+
+                D.shapeKg = false;
+                saveShape();
+                D.arr = [];
+
+            }
+            if (D.xzKg) {
+                pxdata = getPx(D.p, D.p1);
+                kgs = true;
+
+                var sss = new DD();
+                sss.data = Draw.createImgDate(can, D.p, D.p1);
+                sss.p = new point(D.p.x, D.p.y);
+                sss.p1 = new point(D.p1.x, D.p1.y);
+                sss.shape = '橡皮';
+                saveShape(sss);
+
+
+            }
+            if (D.cpKg) {
+                pxdata = getPx(D.p, D.p1);
+                kgs = true;
+
+//                var sss = new DD();
+//                sss.data = Draw.createImgDate(can, D.p, D.p1);
+//                sss.p = new point(D.p.x, D.p.y);
+//                sss.p1 = new point(D.p1.x, D.p1.y);
+//                sss.shape = '橡皮';
+                saveShape();
+
+
+            }
+
+
+            if (D.xpKg) {
+
+                D.xpKg = false;
+                var s = Draw.createImgDate(can, D.p, D.p1);
+                D.data = s;
+                saveShape();
+
+            }
+
+
+        });
+
+
+        addEventListener('mousemove', function (e) {
+
+
+            if (D.startKg && D.shape == '矩形') {
+                D.rectKg = true;
+                var x1 = Math.abs(getMousePos(can, e).x - D.p.x);
+                var y1 = Math.abs(getMousePos(can, e).y - D.p.y);
+
+                D.p1 = new point(x1, y1)
+
+            }
+            if (D.shape == '填充') {
+                D.tcKg = true;
+                tcx = Math.abs(getMousePos(can, e).x);
+                tcy = Math.abs(getMousePos(can, e).y);
+
+
+            }
+            if (D.startKg && D.shape == '文字') {
+                D.wzKg = true;
+                var x1 = Math.abs(getMousePos(can, e).x - D.p.x);
+                var y1 = Math.abs(getMousePos(can, e).y - D.p.y);
+                words.style.width = x1 + 'px';
+                words.style.height = y1 + 'px';
+                words.style.fontSize = y1 + 'px';
+
+                D.p1 = new point(x1, y1)
+
+            }
+
+            if (D.startKg && D.shape == '图片') {
+                D.tuKg = true;
+                var x1 = Math.abs(getMousePos(can, e).x - D.p.x);
+                var y1 = Math.abs(getMousePos(can, e).y - D.p.y);
+                D.p1 = new point(x1, y1)
+
+
+            }
+
+            if (D.startKg && D.shape == '选择') {
+                D.xzKg = true;
+                var x1 = Math.abs(getMousePos(can, e).x - D.p.x);
+                var y1 = Math.abs(getMousePos(can, e).y - D.p.y);
+                cana.width = x1;
+                cana.height = y1;
+                D.p1 = new point(x1, y1)
+
+
+            }
+            if (D.startKg && D.shape == '复制') {
+                D.cpKg = true;
+                var x1 = Math.abs(getMousePos(can, e).x - D.p.x);
+                var y1 = Math.abs(getMousePos(can, e).y - D.p.y);
+                cana.width = x1;
+                cana.height = y1;
+                D.p1 = new point(x1, y1)
+
+
+            }
+            if (D.startKg && D.shape == '橡皮') {
+                D.xpKg = true;
+                var x1 = Math.abs(getMousePos(can, e).x - D.p.x);
+                var y1 = Math.abs(getMousePos(can, e).y - D.p.y);
+
+                D.p1 = new point(x1, y1);
+
+            }
+
+            if (D.startKg && D.shape == '圆形') {
+                D.crlKg = true;
+                var x1 = Math.abs(getMousePos(can, e).x - D.p.x) * Math.abs(getMousePos(can, e).x - D.p.x);
+                var y1 = Math.abs(getMousePos(can, e).y - D.p.y) * Math.abs(getMousePos(can, e).y - D.p.y);
+
+                D.r = Math.sqrt(x1 + y1);
+
+            }
+            if (D.startKg && D.shape == '多边形') {
+                D.dbxKg = true;
+                var x1 = Math.abs(getMousePos(can, e).x - D.p.x) * Math.abs(getMousePos(can, e).x - D.p.x);
+                var y1 = Math.abs(getMousePos(can, e).y - D.p.y) * Math.abs(getMousePos(can, e).y - D.p.y);
+
+                D.r = Math.sqrt(x1 + y1);
+                D.du = getDu(e, D);
+
+
+            }
+            if (D.startKg && D.shape == '多角形') {
+                D.djxKg = true;
+                var x1 = Math.abs(getMousePos(can, e).x - D.p.x) * Math.abs(getMousePos(can, e).x - D.p.x);
+                var y1 = Math.abs(getMousePos(can, e).y - D.p.y) * Math.abs(getMousePos(can, e).y - D.p.y);
+
+                D.r = Math.sqrt(x1 + y1);
+                D.du = getDu(e, D);
+
+
+            }
+
+
+            if (D.startKg && D.shape == '直线') {
+                D.lineKg = true;
+                var x1 = getMousePos(can, e).x;
+                var y1 = getMousePos(can, e).y;
+
+                D.p1 = new point(x1, y1);
+
+            }
+            if (D.startKg && D.shape == '铅笔') {
+                D.panKg = true;
+                pp++;
+                var x1 = getMousePos(can, e).x;
+                var y1 = getMousePos(can, e).y;
+                      if(pp%10==0){    D.arr.push(new point(x1, y1));}
+                  if(pp>=1000){
+                      pp=0;
+                  }
+
+            }
+            if (D.startKg && D.shape == 'shape') {
+                D.shapeKg = true;
+                var x1 = getMousePos(can, e).x;
+                var y1 = getMousePos(can, e).y;
+
+                D.arr.push(new point(x1, y1));
+
+            }
+
+
+
+            if (D.startKg && D.shape == '曲线') {
+                D.quKg = true;
+                var x1 = getMousePos(can, e).x;
+                var y1 = getMousePos(can, e).y;
+                D.p2 = new point(x1, y1);
+
+            }
+
+
+            if (flkg) {
+                if (flxxkg) {
+                    D.fill = Draw.filterX(can, D.p.x, D.p.y, D.p1.x + flxa, D.p1.y + flya, flarr);
+                } else {
+                    D.fill = Draw.filterR(can, D.p.x - flxa, D.p.y - flya, D.p.x - flxa, D.p.y - flya, flr, flr1, flarr);
+                }
+
+            }
+
+            if (flkg1) {
+                if (flxxkg) {
+
+                    D.stroke = Draw.filterR(can, D.p.x, D.p.y, D.p1.x + flxa, D.p1.y + flya, flarr);
+                } else {
+                    D.stroke = Draw.filterR(can, D.p.x - flxa, D.p.y - flya, D.p.x - flxa, D.p.y - flya, flr, flr1, flarr);
+                }
+
+            }
+
+
+        })
+
+        function getDu(e, D) {
+            return Math.atan2(getMousePos(can, e).y - D.p.y, getMousePos(can, e).x - D.p.x);
+
+
+        }
+
+        function inpanl(can, e) {
+
+            if (getMousePos(can, e).x > 0 && getMousePos(can, e).x < can.width + 20 && getMousePos(can, e).y > 0 && getMousePos(can, e).y < can.height + 30) {
+                return true;
+            } else {
+
+                return false;
+            }
+
+        }
+
+        function savePx() {
+
+            var sss = new DD();
+            sss.data = pxdata;
+            sss.p = new point(D.p.x, D.p.y);
+            sss.p1 = new point(D.p1.x, D.p1.y);
+            sss.shape = '像素';
+            saveShape(sss);
+        }
+
+        addEventListener('keydown', function (e) {
+
+            if (e.keyCode == 13) {
+                D.wzkg = false;
+                saveShape();
+                words.style.width = 0;
+                words.style.height = 0;
+                words.style.top = 0;
+
+
+            }
+
+            if (e.keyCode == 39) {
+                kgs = true;
+                D.p.x += 5;
+                add(5, 0);
+
+
+            }
+            if (e.keyCode == 96) {
+                savePx();
+                D.xzKg = false;
+                cana.width = 0;
+                cana.height = 0;
+                cana.style.top = 0;
+
+            }
+
+            if (e.keyCode == 37) {
+
+                D.p.x += -5;
+                add(-5, 0);
+
+
+            }
+            if (e.keyCode == 38) {
+
+                D.p.y += -5;
+                add(0, -5);
+
+            }
+            if (e.keyCode == 40) {
+
+                D.p.y += 5;
+                add(0, 5);
+            }
+            if (e.keyCode == 32) {
+
+                if (D.shape == '选择') {
+
+                    if (nowfl == '灰度') {
+
+                        filter.huidu(pxdata, pxdata.width * pxdata.height * 4);
+
+                    }
+                    if (nowfl == '灰度1') {
+
+                        filter.huidu1(pxdata, pxdata.width * pxdata.height * 4);
+
+                    }
+
+                    if (nowfl == '黑白') {
+
+                        filter.haibai(pxdata, pxdata.width * pxdata.height * 4);
+
+                    }
+                    if (nowfl == '反色') {
+
+                        filter.colrfz(pxdata, pxdata.width * pxdata.height * 4);
+
+                    }
+                    else if (nowfl == '镜像') {
+
+                        filter.mirrorProcess(paintv, pxdata);
+                    } else if (nowfl == '模糊') {
+
+                        filter.blurProcess(paintv, pxdata)
+                    } else if (nowfl == '浮雕') {
+
+                        filter.reliefProcess(paintv, pxdata)
+                        console.log(pxdata);
+                    } else if (nowfl == '雕刻') {
+                        filter.diaokeProcess(paintv, pxdata)
+                    }
+
+                    saveSelect(pxdata);
+                    savePx();
+                    D.xzKg = false;
+                    cana.width = 0;
+                    cana.height = 0;
+                    cana.style.top = 0;
+
+                }
+            }
+        })
+
+        function DrawColor() {
+
+            // console.log(c);
+            var k = 0;
+            for (var i = 0; i < 25; i++) {
+
+                for (var j = 0; j < 25; j++) {
+                    k++;
+                    Draw.rects(canC, colorS[k], {"x": 10 + j * 10, "y": i * 10}, {"x": 9, "y": 9});
+                }
+
+
+            }
+
+        }
+
+        function ColorsA() {
+            var c = '#';
+            var cArray = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'];
+
+            for (var i = 0; i < 6; i++) {
+                var cIndex = Math.round(Math.random() * 15);
+                c += cArray[cIndex];
+
+            }
+            return c;
+        }
+        function getColorA(Count) {
+            var Col = [];
+
+            for (var j = 0; j < Count; j++) {
+                var c = ColorsA();
+                if (Col.length == 0) {
+                    Col.push(c);
+                } else {
+                    if (!Col.have(c)) {
+                        Col.push(c);
+                    } else {
+                        Count++;
+                    }
+                }
+            }
+            return Col;
+
+        }
+
+        function getWordType() {
+            D.kind = document.getElementById('wordtype').value;
+
+        }
+        function getWordDq() {
+            D.alg = document.getElementById('wordDq').value;
+
+
+        }
+
+        function getText() {
+            D.text = document.getElementById('word').value;
+
+        }
+
+
+        function getpic() {
+
+            var file_img = document.getElementById("img"), picupload = document.getElementById('tu');
+            getPath(file_img, picupload, file_img);
+            D.img = new Image();
+            D.img.src = picpath;
+
+        }
+
+        function add(a, b) {
+            var s = cana.style.top + "";
+            var sa = cana.style.left + "";
+            var d = sa.substr(0, sa.length - 2);
+            var da = s.substr(0, sa.length - 2);
+            var k = parseInt(d);
+            var k1 = parseInt(da);
+
+            k += a;
+            k1 += b;
+
+            cana.style.top = k1 + 'px';
+            cana.style.left = k + 'px';
+        }
+
+
+        var picpath = null;
+        function getPath(obj, fileQuery, transImg) {
+            var imgSrc = '', imgArr = [], strSrc = '';
+            if (window.navigator.userAgent.indexOf("MSIE") >= 1) { // IE浏览器判断
+                if (obj.select) {
+                    obj.select();
+                    var path = document.selection.createRange().text;
+                    obj.removeAttribute("src");
+                    imgSrc = fileQuery.value;
+                    imgArr = imgSrc.split('.');
+                    strSrc = imgArr[imgArr.length - 1].toLowerCase();
+                    if (strSrc.localeCompare('jpg') === 0 || strSrc.localeCompare('jpeg') === 0 || strSrc.localeCompare('gif') === 0 || strSrc.localeCompare('png') === 0) {
+                        obj.setAttribute("src", transImg);
+                        obj.style.filter =
+                                "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + path + "', sizingMethod='scale');"; // IE通过滤镜的方式实现图片显示
+                    } else {
+                        throw new Error('File type Error! please image file upload..');
+                    }
+                } else {
+                    imgSrc = fileQuery.value;
+                    imgArr = imgSrc.split('.');
+                    strSrc = imgArr[imgArr.length - 1].toLowerCase();
+                    if (strSrc.localeCompare('jpg') === 0 || strSrc.localeCompare('jpeg') === 0 || strSrc.localeCompare('gif') === 0 || strSrc.localeCompare('png') === 0) {
+                        obj.src = fileQuery.value;
+                        picpath = fileQuery.value
+                        obj.style.width = '100px';
+                        obj.style.height = '100px';
+                    } else {
+                        throw new Error('File type Error! please image file upload..');
+                    }
+                }
+            } else {
+                var file = fileQuery.files[0];
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    imgSrc = fileQuery.value;
+                    imgArr = imgSrc.split('.');
+                    strSrc = imgArr[imgArr.length - 1].toLowerCase();
+                    if (strSrc.localeCompare('jpg') === 0 || strSrc.localeCompare('jpeg') === 0 || strSrc.localeCompare('gif') === 0 || strSrc.localeCompare('png') === 0) {
+                        obj.setAttribute("src", e.target.result);
+                        picpath = e.target.result;
+                        obj.style.width = '100px';
+                        obj.style.height = '100px'
+                    } else {
+                        throw new Error('File type Error! please image file upload..');
+                    }
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function getNowFl() {
+
+            nowfl = document.getElementById('nowfl').value;
+
+
+        }
+
+        function addfl() {
+            var ca1 = new ca(flbfb, nowColor);
+            flarr.push(ca1);
+        }
+        function passfl() {
+            if (flarr.length >= 1) {
+                flarr.del(flarr.length - 1);
+            }
+
+        }
+    </script>
+</head>
+<body style="text-align: center;overflow-y: hidden">
+
+------------------------------------------------------------------------------------------------------------------------<br>
+<select id="sel" onchange="getshape();" style="width: 60px;height: 30px;">
+    <option>图形</option>
+    <option>选择</option>
+    <option>填充</option>
+    <option>复制</option>
+    <option>图片</option>
+    <option>橡皮</option>
+    <option>圆形</option>
+    <option>矩形</option>
+    <option>文字</option>
+    <option>直线</option>
+    <option>shape</option>
+    <option>铅笔</option>
+    <option>曲线</option>
+    <option>多角形</option>
+    <option>多边形</option>
+</select>
+<select id="nowfl" onchange="getNowFl();" style="width: 60px;height: 30px;">
+    <option>滤镜</option>
+    <option>反色</option>
+    <option>黑白</option>
+    <option>灰度</option>
+    <option>灰度1</option>
+    <option>浮雕</option>
+    <option>雕刻</option>
+    <option>模糊</option>
+    <option>镜像</option>
+</select>
+边框<input id="strCol" value="#0000aa" onchange="getStrcol()" type="color">
+<button id="bktm" onclick="javascript:D.stroke='transparent';this.style.background='red';flkg1=false; ">透明</button>
+填充<input id="filCol" value="#ff0000" onchange="getFillcol()" type="color">
+<button id="tctm" onclick="javascript:D.fill='transparent' ;this.style.background='red';flkg=false; ">透明</button>
+角度<input id="rotatez"  style="width: 50px;"    type="text"  onblur="javascript: rotatez=parseInt(document.getElementById('rotatez').value);">
+
+线宽<input id="linew" min="0.1" max="15" style="width: 80px;" onchange="getLinew()" type="range">
+发光色<input id="blurColor" value="#ffffff" onchange="getBlurcolor()" type="color">
+发光半径<input id="blurw" min="0" style="width: 80px;" max="100" onchange="getBlurw()" type="range"><br>
+------------------------------------------------------------------------------------------------------------------------
+
+<br>
+<select id="wordtype" onchange="getWordType();" style="width: 60px;height: 30px;">
+    <option>Arial</option>
+    <option>Verdana</option>
+    <option>Times</option>
+    <option>New Roman</option>
+    <option>serif</option>
+    <option>sans-serif</option>
+
+</select>
+<select id="wordDq" onchange="getWordDq();" style="width: 60px;height: 30px;">
+    <option>center</option>
+    <option>end</option>
+    <option>left</option>
+    <option> right</option>
+    <option>start</option>
+    <option>textBaseline</option>
+
+</select>
+
+
+APL<input id="apl" min="0" max="100" style="width: 80px;" onchange="getApl()" type="range">
+多边形边数<input id="dbx" min="3" max="18" style="width: 80px;"
+            onchange="javascript:D.n=document.getElementById('dbx').value;" type="range">
+<button id="clear" onclick="javascript:shapeArray=[];">清空</button>
+<button id="back" onclick="javascript:shapeArray.del([shapeArray.length-1]);">后退</button>
+<button id="wg" onclick="javascript:wg=(wg==true? false:true);">网格</button>
+网格宽<input id="wgw" min="10" step="10" max="60" style="width: 60px;" onchange="getWgw()" type="range">
+<input id="tu" type="file" style="width: 35px;height: 30px;border-radius: 20px" onchange="getpic();">
+<img id="img" style="position: absolute;left:50px;top:0px" style="width: 100px;height: 100px">
+<br>
+
+<div>
+    <canvas id="canvas" width="800" height="500" style="border-radius: 20px;border: 2px solid gray">
+    </canvas>
+
+    <canvas id="canvas1" width="260" height="500"
+            style="position:absolute;top:100px;left:10px;border-radius: 20px ;border: 2px solid gray"></canvas>
+
+    <canvas id="canvas2" width="0" height="0"
+            style="position:absolute;top:100px;left:10px; ;border: 1px solid gray"></canvas>
+    <input type="text" id="word" style="position:absolute;top:0;display:none" width="0" height="0" oninput="getText();">
+    <canvas id="canvasColor" width="270" height="500"
+            style="position:absolute;top:100px;left:1090px ;border: 2px solid gray"></canvas>
+
+    <input id="flr" min="1" max="100" style="position :absolute;width: 250px;left:1100px;top:390px;"
+           onchange="javascript:flr=document.getElementById('flr').value" type="range">
+    <input id="flr1" min="1" max="100" style="position :absolute;width: 250px;left:1100px;top:410px;"
+           onchange="javascript:flr1=document.getElementById('flr1').value" type="range">
+    <input id="flx" min="0" max="250" value="0" style="position :absolute;width: 250px;left:1100px;top:350px;"
+           onchange="javascript:flxa=document.getElementById('flx').value;" type="range">
+    <input id="fly" min="0" max="250" value="0" style="position :absolute;width: 250px;left:1100px;top:370px;"
+           onchange="javascript:flya=document.getElementById('fly').value;" type="range">
+
+
+    <input id="flbfb" min="0" step="0.05" max="1" style="position :absolute;width: 60px;left:1270px;top:70px;"
+           onchange="flbfb=document.getElementById('flbfb').value" type="range">
+    <button id="jia" style="position:absolute;left:1180px;width:30px;top:70px;" onclick="addfl();">+</button>
+    <button id="jian" style="position:absolute;left:1230px;width:30px;top:70px;" onclick="passfl();">-</button>
+    <button id="jbtc" style="position:absolute;left:1130px;width:30px;top:70px;" onclick="javascript:flkg=true;">充
+    </button>
+    <button id="jbbk" style="position:absolute;left:1090px;width:30px;top:70px;" onclick="javascript:flkg1=true;">渐
+    </button>
+    <button id="flxxjb" style="position:absolute;left:1100px;width:80px;height:20px;top:430px;"
+            onclick="javascript:flxxkg=(flxxkg==false? true:false)">切换渐变
+    </button>
+</div>
+</body>
+
+</html>
